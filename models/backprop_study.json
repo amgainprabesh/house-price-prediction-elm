@@ -1,0 +1,41 @@
+{
+  "hidden_units": 512,
+  "activation": "logistic (sigmoid)",
+  "optimiser": "adam, learning rate 1e-3",
+  "epochs_run": 300,
+  "curve": [
+    {
+      "epoch": 25,
+      "elapsed_seconds": 11.367749100001674,
+      "train_rmse": 65158.996211244965,
+      "test_rmse": 66525.97618462834
+    },
+    {
+      "epoch": 50,
+      "elapsed_seconds": 33.45181450000018,
+      "train_rmse": 61575.00090942712,
+      "test_rmse": 62546.122208469955
+    },
+    {
+      "epoch": 100,
+      "elapsed_seconds": 101.80248820000088,
+      "train_rmse": 57743.6785081941,
+      "test_rmse": 58666.97331439645
+    },
+    {
+      "epoch": 200,
+      "elapsed_seconds": 261.0812627000014,
+      "train_rmse": 54317.60100585535,
+      "test_rmse": 55790.77513437325
+    },
+    {
+      "epoch": 300,
+      "elapsed_seconds": 495.93507860000136,
+      "train_rmse": 52516.60775147834,
+      "test_rmse": 54464.30169678233
+    }
+  ],
+  "final_test_rmse": 54464.30169678233,
+  "final_elapsed_seconds": 234.85381589999997,
+  "total_study_seconds": 495.93507860000136
+}

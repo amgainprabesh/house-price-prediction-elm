@@ -1,0 +1,31 @@
+{
+  "rows_clean": 20433,
+  "rows_dropped_missing_bedrooms": 207,
+  "rows_capped_target": 985,
+  "n_features": 15,
+  "features": [
+    "longitude",
+    "latitude",
+    "housing_median_age",
+    "total_rooms",
+    "total_bedrooms",
+    "population",
+    "households",
+    "median_income",
+    "rooms_per_household",
+    "bedrooms_per_room",
+    "population_per_household",
+    "ocean_<1H OCEAN",
+    "ocean_INLAND",
+    "ocean_NEAR BAY",
+    "ocean_NEAR OCEAN"
+  ],
+  "n_train": 16346,
+  "n_test": 4087,
+  "target_mean": 206864.41315519012,
+  "target_std": 115432.84232788176,
+  "target_min": 14999.0,
+  "target_max": 500001.0,
+  "test_frac": 0.2,
+  "seed": 42
+}

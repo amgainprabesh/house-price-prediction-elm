@@ -1,0 +1,29 @@
+{
+  "n_hidden": 512,
+  "activation": "sigmoid",
+  "alpha": 0.0,
+  "seed": 42,
+  "n_features": 15,
+  "features": [
+    "longitude",
+    "latitude",
+    "housing_median_age",
+    "total_rooms",
+    "total_bedrooms",
+    "population",
+    "households",
+    "median_income",
+    "rooms_per_household",
+    "bedrooms_per_room",
+    "population_per_household",
+    "ocean_<1H OCEAN",
+    "ocean_INLAND",
+    "ocean_NEAR BAY",
+    "ocean_NEAR OCEAN"
+  ],
+  "test_rmse": 57405.84861236362,
+  "test_mae": 40140.561980873834,
+  "test_r2": 0.7539476174504018,
+  "test_mape_pct": 23.25435350444687,
+  "train_seconds": 15.770335400000477
+}

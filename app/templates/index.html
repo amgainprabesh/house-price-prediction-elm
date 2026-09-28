@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>House Price Prediction - Extreme Learning Machine</title>
+<style>
+  :root{
+    --ink:#12171f; --muted:#5d6b7e; --line:#d7dee8;
+    --accent:#1a5fb4; --accent-soft:#eaf1fb; --bg:#f6f8fb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:15px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  header{
+    background:linear-gradient(135deg,#12325c,#1a5fb4);
+    color:#fff; padding:26px 20px;
+  }
+  .wrap{max-width:1050px;margin:0 auto;padding:0 20px}
+  header h1{margin:0 0 6px;font-size:23px;font-weight:650}
+  header p{margin:0;opacity:.85;font-size:14px}
+  .badges{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+  .badge{
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
+    padding:4px 11px;border-radius:20px;font-size:12.5px;
+  }
+  main{padding:26px 0 60px}
+  .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;align-items:start}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:22px;box-shadow:0 1px 3px rgba(16,32,64,.05);
+  }
+  h2{margin:0 0 4px;font-size:16.5px}
+  .hint{color:var(--muted);font-size:13px;margin:0 0 16px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  label{display:block;font-size:12.5px;font-weight:600;margin-bottom:4px;color:#31414f}
+  input,select{
+    width:100%;padding:9px 10px;border:1px solid var(--line);
+    border-radius:8px;font-size:14px;background:#fdfefe;color:var(--ink);
+  }
+  input:focus,select:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+  .field{margin-bottom:12px}
+  button{
+    width:100%;margin-top:8px;padding:12px;border:0;border-radius:9px;
+    background:var(--accent);color:#fff;font-size:15px;font-weight:600;cursor:pointer;
+  }
+  button:hover{background:#144a90}
+  .result{
+    border:1px solid #bcd2f0;background:var(--accent-soft);border-radius:12px;
+    padding:20px;text-align:center;
+  }
+  .price{font-size:31px;font-weight:700;color:#12325c;margin:6px 0 2px}
+  .range{color:var(--muted);font-size:13px}
+  .err{
+    border:1px solid #e6b3b3;background:#fdf1f1;color:#8a2020;
+    border-radius:9px;padding:11px 13px;font-size:13.5px;margin-bottom:14px;
+  }
+  dl{margin:0;font-size:13.6px}
+  dt{color:var(--muted);font-size:12.5px}
+  dd{margin:0 0 11px;font-weight:600}
+  footer{color:var(--muted);font-size:12.5px;padding:18px 0;border-top:1px solid var(--line)}
+  code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>House Price Prediction Using an Extreme Learning Machine</h1>
+    <p>Single-hidden-layer feedforward network with a randomly initialised hidden layer and a closed-form output solution &mdash; no back-propagation.</p>
+    <div class="badges">
+      <span class="badge">{{ meta.n_hidden }} hidden neurons</span>
+      <span class="badge">activation: {{ meta.activation }}</span>
+      <span class="badge">test R&sup2; = {{ '%.4f'|format(meta.test_r2) }}</span>
+      <span class="badge">test RMSE = ${{ '{:,.0f}'.format(meta.test_rmse) }}</span>
+      <span class="badge">trained in {{ '%.2f'|format(meta.train_seconds) }} s</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  {% if error %}
+  <div class="err">{{ error }}</div>
+  {% endif %}
+
+  <div class="grid">
+    <section class="card">
+      <h2>Enter the block group attributes</h2>
+      <p class="hint">Values are for a census block group. The three per-household ratios are computed automatically.</p>
+      <form method="post" action="/predict">
+        <div class="row">
+          <div class="field">
+            <label for="median_income">Median income (10k USD)</label>
+            <input id="median_income" name="median_income" type="number" step="0.0001" min="0"
+                   value="{{ form.median_income or '5.5' }}" required>
+          </div>
+          <div class="field">
+            <label for="housing_median_age">Median house age (years)</label>
+            <input id="housing_median_age" name="housing_median_age" type="number" step="1" min="1"
+                   value="{{ form.housing_median_age or '25' }}" required>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="total_rooms">Total rooms</label>
+            <input id="total_rooms" name="total_rooms" type="number" step="1" min="1"
+                   value="{{ form.total_rooms or '2400' }}" required>
+          </div>
+          <div class="field">
+            <label for="total_bedrooms">Total bedrooms</label>
+            <input id="total_bedrooms" name="total_bedrooms" type="number" step="1" min="1"
+                   value="{{ form.total_bedrooms or '480' }}" required>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="population">Population</label>
+            <input id="population" name="population" type="number" step="1" min="1"
+                   value="{{ form.population or '1200' }}" required>
+          </div>
+          <div class="field">
+            <label for="households">Households</label>
+            <input id="households" name="households" type="number" step="1" min="1"
+                   value="{{ form.households or '450' }}" required>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="latitude">Latitude</label>
+            <input id="latitude" name="latitude" type="number" step="0.01"
+                   value="{{ form.latitude or '34.05' }}" required>
+          </div>
+          <div class="field">
+            <label for="longitude">Longitude</label>
+            <input id="longitude" name="longitude" type="number" step="0.01"
+                   value="{{ form.longitude or '-118.25' }}" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="ocean_proximity">Ocean proximity</label>
+          <select id="ocean_proximity" name="ocean_proximity">
+            {% for o in oceans %}
+            <option value="{{ o }}" {% if form.ocean_proximity == o %}selected{% endif %}>{{ o }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit">Predict price</button>
+      </form>
+    </section>
+
+    <aside>
+      {% if prediction %}
+      <div class="result">
+        <div style="font-size:13px;color:var(--muted)">Estimated median house value</div>
+        <div class="price">${{ '{:,.0f}'.format(prediction.price) }}</div>
+        <div class="range">typical range ${{ '{:,.0f}'.format(prediction.low) }} &ndash; ${{ '{:,.0f}'.format(prediction.high) }}</div>
+      </div>
+      {% else %}
+      <div class="card">
+        <h2>How the prediction is made</h2>
+        <p class="hint">The row is z-scored with the training statistics, passed through {{ meta.n_hidden }} hidden neurons, and multiplied by the output weights &beta;.</p>
+        <p style="font-size:13.5px;color:var(--muted);margin:0">
+          y = g(xW + b)&nbsp;&beta;&nbsp;&nbsp; where <b>W</b>, <b>b</b> are random and fixed, and
+          <b>&beta;</b> = <b>H</b><sup>+</sup><b>y</b> is solved once in closed form.
+        </p>
+      </div>
+      {% endif %}
+
+      <div class="card" style="margin-top:18px">
+        <h2>Model card</h2>
+        <p class="hint">Measured on the held-out 20% test split ({{ meta.n_features }} features), never used during training.</p>
+        <dl>
+          <dt>Hidden neurons (L)</dt><dd>{{ meta.n_hidden }}</dd>
+          <dt>Activation function</dt><dd>{{ meta.activation }}</dd>
+          <dt>Training time</dt><dd>{{ '%.2f'|format(meta.train_seconds) }} s (single pinv solve)</dd>
+          <dt>Test RMSE</dt><dd>${{ '{:,.0f}'.format(meta.test_rmse) }}</dd>
+          <dt>Test MAE</dt><dd>${{ '{:,.0f}'.format(meta.test_mae) }}</dd>
+          <dt>Coefficient of determination (R&sup2;)</dt><dd>{{ '%.4f'|format(meta.test_r2) }}</dd>
+          <dt>MAPE</dt><dd>{{ '%.2f'|format(meta.test_mape_pct) }} %</dd>
+        </dl>
+        <p class="hint" style="margin:12px 0 0">JSON endpoint: <code>POST /api/predict</code> &middot; <code>GET /model-info</code></p>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    BSc CSIT &middot; CSC383 Neural Networks &middot; project work demonstration.
+    ELM implementation written from scratch with NumPy.
+  </footer>
+</main>
+</body>
+</html>
